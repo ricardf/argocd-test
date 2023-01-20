@@ -1,6 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devops-toolkit
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: ricardf/devops-toolkit
+    argocd-image-updater.argoproj.io/write-back-method: git:secret:default/git-creds
+    argocd-image-updater.argoproj.io/git-branch: main
 spec:
+  project: production
+  source:
+    repoURL: https://github.com/vfarcic/argo-cd-image-updater
+    targetRevision: HEAD
+    path: kustomize/overlays/production
   destination:
     server: https://kubernetes.default.svc
-  source:
-    repoURL: https://github.com/argoproj/argocd-example-apps
-    targetRevision: HEAD
+    namespace: production
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+      allowEmpty: true
